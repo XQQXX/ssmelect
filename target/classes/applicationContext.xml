@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+ ">
+
+    <!--    开启spring注解扫描-->
+    <context:component-scan base-package="com.elect"/>
+
+    <!--    开启springAOP注解扫描-->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <!--    申明事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--    开启事务注解扫描-->
+        <tx:annotation-driven proxy-target-class="true" transaction-manager="transactionManager"/>
+
+
+    <!--======================springMVC============================-->
+    <!--    开启springMVC注解扫描-->
+    <mvc:annotation-driven/>
+    <!--    视图解析器     -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!--    配置视图路径的前缀匹配路径-->
+        <property name="prefix" value=""></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+
+    <!--======================mybatis数据库==========================-->
+    <util:properties id="jdbc" location="classpath:jdbc.properties"/>
+    <!--    初始化连接池对象-->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="#{jdbc.driverClassName}"/>
+        <property name="url" value="#{jdbc.url}"/>
+        <property name="username" value="#{jdbc.username}"/>
+        <property name="password" value="#{jdbc.password}"/>
+        <property name="initialSize" value="#{jdbc.initialSize}"/>
+        <property name="maxIdle" value="#{jdbc.maxIdle}"/>
+        <property name="minIdle" value="#{jdbc.minIdle}"/>
+        <property name="maxWaitMillis" value="#{jdbc.maxWaitMillis}"/>
+    </bean>
+    <!--    创建mybatis的会话工厂-->
+    <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+<!--        <property name="mapperLocations" value="classpath:com/elect/dao/*Mapper.xml"/>-->
+        <property name="configLocation" value="classpath:mybatis-cfg.xml"/>
+    </bean>
+    <!--    扫描指定路径下的接口-->
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.elect.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sessionFactory"/>
+    </bean>
+
+
+</beans>
